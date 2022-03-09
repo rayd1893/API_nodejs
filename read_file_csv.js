@@ -53,8 +53,7 @@ function list_provinces(){
 
 //Routes for API
 router.get("/", function(req, res){
-    res.send(list_provinces());
-    //res.send('Hello Aictive, this API was developed by Rayd Trujillo :)');
+    res.send('Hello Aictive, this API was developed by Rayd Trujillo :)');
 });
 
 router.get("/countries_confirmed", function(req, res){
