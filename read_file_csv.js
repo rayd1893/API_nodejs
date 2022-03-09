@@ -34,16 +34,21 @@ function list_countries() {
 
 // List of Countries and Provinces
 function list_provinces(){
-    
-    var res = data.reduce(function(a, b) {
-        if(a[b['Country_Region']]) {
-          a[b['Country_Region']].push( {Province_State: b['Province_State']} )
-        } else {
-          a[b['Country_Region']] = [ {Province_State: b['Province_State']} ]
+    countries = list_countries();
+    result = []
+    for(country of countries){
+        detail = {};
+        provinces = [];
+        for(const i of data){
+            if(i.Country_Region == country && provinces.indexOf(i.Province_State) === -1){
+                provinces.push(i.Province_State);
+            }
         }
-        return a
-      }, {})
-    return res;
+        detail['Country_Region'] = country;
+        detail['Provinces'] = provinces;
+        result.push(detail);
+    }
+    return result;
 }
 
 //Routes for API
@@ -81,13 +86,24 @@ router.get("/countries_active", function (req, res) {
         res.status(400).jsonp({status_code: 400, message: "The maximum range must be greater than the minimum range"});    
     }
     const result = [];
-    for(const i of data){
-        countries_active = {}
-        if(parseInt(i.Active) >= min && parseInt(i.Active) <= max){
-            countries_active['Country_Region'] = i.Country_Region;
-            countries_active['Province_State'] = i.Province_State;
-            countries_active['Active'] = parseInt(i.Active);
-            result.push(countries_active);
+    const list_province = list_provinces();
+
+    for(const element of list_province){
+        for(const province of element.Provinces){
+            country_province = {}
+            active = 0;
+            for(const i of data){
+                
+                if(element.Country_Region == i.Country_Region && province == i.Province_State){
+                    active += parseInt(i.Active);
+                }
+            }
+            if(active >= min && active <= max){
+                country_province['Country_Region'] = element.Country_Region;
+                country_province['Province_State'] = province;
+                country_province['Active'] = active;
+                result.push(country_province);
+            }
         }
     }
     res.status(200).jsonp(result);
